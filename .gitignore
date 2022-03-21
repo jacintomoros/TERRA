@@ -1,0 +1,4 @@
+﻿node_modules
+.vscode/*
+!.vscode/launch.json
+src/examples/test/backup.html
