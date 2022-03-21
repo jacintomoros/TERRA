@@ -7,6 +7,8 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.126.0/exampl
 import { Rhino3dmLoader } from 'https://cdn.jsdelivr.net/npm/three@0.126.0/examples/jsm/loaders/3DMLoader.js'
 import rhino3dm from 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/rhino3dm.module.js'
 import { TransformControls } from "https://cdn.jsdelivr.net/npm/three@0.126.0/examples/jsm/controls/TransformControls.js";
+import { RhinoCompute } from "https://cdn.jsdelivr.net/npm/compute-rhino3d@0.13.0-beta/compute.rhino3d.module.js";
+
 
 // We set up first the menu appearance
 let btn = document.querySelector("#btn");
@@ -26,7 +28,7 @@ const loader = new Rhino3dmLoader()
 loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/' )
 
 // set up gh definition
-const definition = 'convert_landscape.gh'
+const definitionName = 'convert_landscape.gh'
 
 // adding inputs
 const fileInput = document.getElementById("img");
@@ -217,9 +219,22 @@ zvec_slider.oninput = function(){
 let point = [];
 let rhino, doc
 
-rhino3dm().then(async m => {
-    console.log('Loaded rhino3dm.')
-    rhino = m
+rhino3dm().then(async (m) => {
+  console.log("Loaded rhino3dm.");
+  rhino = m; // global
+
+  //RhinoCompute.url = getAuth( 'RHINO_COMPUTE_URL' ) // RhinoCompute server url. Use http://localhost:8081 if debugging locally.
+  //RhinoCompute.apiKey = getAuth( 'RHINO_COMPUTE_KEY' )  // RhinoCompute server api key. Leave blank if debugging locally.
+
+  RhinoCompute.url = "http://localhost:8081/"; //if debugging locally.
+
+  // load a grasshopper file!
+
+  const url = definitionName;
+  const res = await fetch(url);
+  const buffer = await res.arrayBuffer();
+  const arr = new Uint8Array(buffer);
+  definition = arr;
 
     init()
     rndPts()
@@ -379,7 +394,7 @@ function init() {
  */
 async function compute() {
   const data = {
-    definition: definition,
+    definition: definitionName,
     inputs: {
      'Resolution': res_slider.valueAsNumber,
      'Upload Image': obPath.innerText,
